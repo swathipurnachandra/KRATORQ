@@ -1,48 +1,665 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event Showcase</title>
-  <link rel="stylesheet" href="css/event-style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KRATORQ 2025 - Cinematic (Projection + Flames)</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * {box-sizing:border-box;margin:0;padding:0}
+    html,body {height:100%}
+    body {
+      font-family:'Poppins',sans-serif;
+      background: url('Images/Background2.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color:#fff;
+      overflow:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    /* subtle dark overlay above background for contrast */
+    body::before{
+      content:"";
+      position:fixed;inset:0;background:rgba(6,0,10,0.55);z-index:-2;
+    }
+
+    /* Three.js canvas sits between background and content */
+    #glCanvas { position:fixed;inset:0;width:100%;height:100%; z-index:0; pointer-events:none; }
+
+    header {
+      text-align:center;
+      padding:1.3rem 1rem;
+      z-index:4;
+      position:relative;
+      pointer-events:none;
+    }
+    header h1 {font-size:2rem;color:#ff3b3b;text-shadow:0 6px 22px rgba(255,0,60,0.18)}
+    header p {color:#ddd;margin-top:.25rem}
+
+    .scene-wrap {
+      position:relative;
+      padding:3.2rem 1rem 4rem; /* pushed down so header stays visible */
+      max-width:1300px;margin:0 auto;
+      z-index:4;
+      perspective:1400px;
+    }
+
+    .carousel {
+      position:relative;
+      margin-top:38px;              /* extra separation from header */
+      height:760px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform-style:preserve-3d;
+      user-select:none;
+    }
+
+    .event-card {
+      position:absolute;
+      width:360px;
+      height:640px;
+      transform-style:preserve-3d;
+      transition:transform 0.9s cubic-bezier(.2,.9,.2,1),opacity .45s;
+      border-radius:18px;
+      overflow:visible;
+      box-shadow:0 40px 90px rgba(0,0,0,0.6);
+      background:linear-gradient(180deg, rgba(20,0,30,0.9), rgba(8,0,18,0.88));
+      border:1px solid rgba(255,0,60,0.12);
+      -webkit-backface-visibility:hidden;
+      backface-visibility:hidden;
+      display:flex;
+      align-items:stretch;
+      justify-content:stretch;
+      opacity:0; /* non-focused cards hidden by default */
+      pointer-events:none;
+    }
+    .event-card.active { opacity:1; pointer-events:auto; transform:translateZ(120px) scale(1.03) }
+    .card-inner {
+      width:100%;height:100%;
+      transform-style:preserve-3d;
+      transition:transform .75s cubic-bezier(.2,.9,.2,1);
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.12));
+    }
+    .event-card.is-flipped .card-inner { transform:rotateY(180deg) }
+
+    .card-face { position:absolute; inset:0; backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; }
+    .card-front { padding:0; }
+    .card-back { transform:rotateY(180deg); padding:22px; display:flex; align-items:center; justify-content:center; text-align:center; }
+
+    /* Poster (image) area */
+    .poster {
+      width:100%;
+      height:68%;
+      background:#0b0710;
+      display:block;
+      position:relative;
+      overflow:hidden;
+      border-bottom:4px solid #ff3b3b;
+    }
+
+    .poster img {
+      width:100%;
+      height:100%;
+      object-fit:cover;         /* fills the frame perfectly */
+      display:block;
+      transform-origin:center;
+      opacity:0;               /* animate to 1 on projection */
+      will-change:transform,opacity,filter;
+    }
+
+    /* title overlay at bottom of poster */
+    .poster-title {
+      position:absolute;
+      left:0;right:0;bottom:0;
+      padding:14px 16px;
+      background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.6));
+      color:#fff;
+      font-weight:700;
+      font-size:1rem;
+      text-align:left;
+      letter-spacing:0.2px;
+    }
+
+    /* flame aura around poster (CSS animated) */
+    .flame-aura {
+      position:absolute;
+      inset:8% 8% 4%;
+      pointer-events:none;
+      border-radius:12px;
+      mix-blend-mode:screen;
+      filter:blur(10px) saturate(130%);
+      opacity:0.9;
+      z-index:2;
+    }
+    .aura-core{
+      position:absolute;inset:0;border-radius:12px;
+      background:
+        radial-gradient(circle at 50% 85%, rgba(255,180,80,0.18), rgba(255,110,40,0.08) 25%, rgba(0,0,0,0) 60%),
+        radial-gradient(circle at 50% 30%, rgba(255,80,40,0.08), rgba(0,0,0,0) 40%);
+      animation: auraPulse 2.2s infinite;
+      transform:translateZ(-1px);
+    }
+    @keyframes auraPulse {
+      0% { transform: scale(0.98); opacity:0.85 }
+      50% { transform: scale(1.02); opacity:1 }
+      100% { transform: scale(0.98); opacity:0.85 }
+    }
+
+    /* back content style */
+    .back-content h2 { color:#ff6b6b; margin-bottom:10px; font-size:1.1rem }
+    .back-content p { color:#efecec; line-height:1.5; font-size:0.96rem }
+    .register-btn { display:inline-block;margin-top:16px;padding:10px 16px;border-radius:28px;background:linear-gradient(90deg,#ff4d4d,#ff1a75); color:white; text-decoration:none; font-weight:700; box-shadow: 0 12px 36px rgba(255,20,80,0.22) }
+
+    /* controls */
+    .controls { position:relative; margin-top:1.6rem; text-align:center; z-index:4; }
+    .control-btn { display:inline-flex; align-items:center; justify-content:center; width:46px;height:46px;border-radius:50%; background:rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.05); margin:0 .5rem; cursor:pointer; }
+
+    /* subtle DOM embers */
+    .dom-embers { position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
+
+    footer { text-align:center; padding:1.2rem 1rem; color:#bbb; z-index:4; position:relative; }
+
+    @media (max-width:920px){
+      .carousel{height:620px}
+      .event-card{width:320px;height:580px}
+      .poster{height:66%}
+    }
+    @media (max-width:560px){
+      .carousel{height:520px}
+      .event-card{width:260px;height:500px}
+      .poster{height:60%}
+      header h1{font-size:1.6rem}
+    }
+  </style>
 </head>
 <body>
-  <header class="header">
+  <canvas id="glCanvas"></canvas>
+
+  <header>
     <h1>KRATORQ'2025</h1>
     <p>Present. Compete. Create. Celebrate Engineering.</p>
   </header>
 
-  <main class="event-container" id="eventContainer">
-    <!-- Events will be dynamically loaded here -->
+  <main class="scene-wrap">
+    <div class="carousel" id="carousel"></div>
+
+    <div class="controls" id="controls">
+      <button class="control-btn" id="prevBtn" aria-label="Previous">◀</button>
+      <button class="control-btn" id="nextBtn" aria-label="Next">▶</button>
+    </div>
+
+    <canvas class="dom-embers" id="domEmbers"></canvas>
   </main>
 
-  <!-- Contact & Queries Section -->
-<section class="contact-section">
-  <div class="contact-container">
-    <h2>For Further Queries</h2>
-
-    <div class="contact-details">
-      <div class="contact-card">
-        <h3>Student Coordinator</h3>
-        <p><strong>Name:</strong>DV Mirnalini</p>
-        <p><strong>Phone:</strong> +91 8148115510</p>
-      </div>
-
-      <div class="contact-card">
-        <h3>Faculty Coordinator</h3>
-        <p><strong>Name:</strong> Mr. Gowri Manohar</p>
-        <p><strong>Phone:</strong> +91 9849367949</p>
+  <section class="contact-section" style="z-index:4;position:relative;padding:2rem 1rem;">
+    <div style="max-width:800px;margin:0 auto;text-align:center">
+      <h2 style="color:#ff3b3b;margin-bottom:1rem">For Further Queries</h2>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">
+        <div style="background:rgba(255,255,255,0.04);padding:1rem;border-radius:10px;border:1px solid rgba(255,0,60,0.08);min-width:220px">
+          <h3>Student Coordinator</h3>
+          <p><strong>Name:</strong> DV Mirnalini</p>
+          <p><strong>Phone:</strong> +91 8148115510</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);padding:1rem;border-radius:10px;border:1px solid rgba(255,0,60,0.08);min-width:220px">
+          <h3>Faculty Coordinator</h3>
+          <p><strong>Name:</strong> Mr. Gowri Manohar</p>
+          <p><strong>Phone:</strong> +91 9849367949</p>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
+  <footer>© 2025 KRATORQ | Designed with ❤️</footer>
 
-  <footer>
-    <p>© 2025 KRATORQ | Designed with ❤️</p>
-  </footer>
+  <!-- Libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
 
-<script src="js/event-script.js"></script>
+  <script>
+  // ---------------------------
+  // Data
+  // ---------------------------
+  const events = [
+    { title: "Paper Presentation", tagline: "Present. Persuade. Inspire.", description: "Showcase your innovative engineering ideas, research, and problem-solving skills to a panel of experts.", image: "Images/4.jpg", formLink: "https://forms.gle/c3hbLbrcjXT13TYq6" },
+    { title: "Auto Quiz", tagline: "Rev your brains, not your engines.", description: "Challenge your knowledge of automobiles, engines, and modern mobility.", image: "Images/10.jpg", formLink: "https://forms.gle/74zHrYH3jNyVgNcu8" },
+    { title: "Tech MUN (Model United Nations)", tagline: "Where policy meets innovation.", description: "Step into the shoes of world engineers, leaders, and technocrats.", image: "Images/3.jpg", formLink: "https://forms.gle/DXBEwDs91dHJBrAD8" },
+    { title: "Pit Stop Challenge – F1 Ideathon", tagline: "Think like an engineer, act like a racer.", description: "Ideate and design F1-inspired concepts.", image: "Images/1.jpg", formLink: "https://forms.gle/eCn8NrjFgqjExXpSA" },
+    { title: "Treasure Hunt", tagline: "Decode. Discover. Dominate.", description: "Follow the clues, crack the codes, and race across campus.", image: "Images/8.jpg", formLink: "https://forms.gle/uAywoEBSUDKLL5kU9" },
+    { title: "F1 Logo Design", tagline: "Design the symbol of speed.", description: "Showcase your creativity by crafting a dynamic F1-inspired logo.", image: "Images/2.jpg", formLink: "https://forms.gle/yayPpaXHeXvjQPJr8" }
+  ];
+
+  // ---------------------------
+  // Build cards robustly (so we can attach load/error handlers)
+  // ---------------------------
+  const carousel = document.getElementById('carousel');
+  const cards = [];
+  const radius = 520;
+  const baseAngle = 360 / Math.max(events.length,1);
+  let activeIndex = 0;
+  let autoplayTimer = null;
+  const AUTOPLAY_INTERVAL = 5000;
+
+  // generate SVG placeholder with title (data URL)
+  function svgPlaceholder(title, w=800, h=500){
+    const escaped = title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#0b0710"/><stop offset="1" stop-color="#15081a"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><text x="50%" y="48%" fill="#ff6b6b" font-family="Poppins, sans-serif" font-size="28" text-anchor="middle" dominant-baseline="middle">${escaped}</text><text x="50%" y="62%" fill="#ffd5d8" font-family="Poppins, sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">Image unavailable</text></svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // create each card element and set up image loading/animation hooks
+  events.forEach((ev, idx) => {
+    const c = document.createElement('div'); c.className = 'event-card'; c.dataset.index = idx;
+    const inner = document.createElement('div'); inner.className = 'card-inner';
+    const front = document.createElement('div'); front.className = 'card-face card-front';
+    const poster = document.createElement('div'); poster.className = 'poster';
+    const img = document.createElement('img'); img.alt = ev.title;
+    img.dataset.src = ev.image;
+    img.dataset.loaded = 'false';
+    img.dataset.projected = 'false';
+    const titleOverlay = document.createElement('div'); titleOverlay.className = 'poster-title';
+    titleOverlay.textContent = ev.title;
+
+    const aura = document.createElement('div'); aura.className = 'flame-aura';
+    const auraCore = document.createElement('div'); auraCore.className = 'aura-core';
+    aura.appendChild(auraCore);
+
+    poster.appendChild(img);
+    poster.appendChild(aura);
+    poster.appendChild(titleOverlay);
+    front.appendChild(poster);
+
+    const back = document.createElement('div'); back.className = 'card-face card-back';
+    const backContent = document.createElement('div'); backContent.className = 'back-content';
+    const h2 = document.createElement('h2'); h2.textContent = ev.title;
+    const p = document.createElement('p'); p.textContent = ev.description;
+    const a = document.createElement('a'); a.className = 'register-btn'; a.href = ev.formLink; a.target = '_blank'; a.textContent = 'Register Now';
+    backContent.appendChild(h2); backContent.appendChild(p); backContent.appendChild(a);
+    back.appendChild(backContent);
+
+    inner.appendChild(front); inner.appendChild(back);
+    c.appendChild(inner);
+    carousel.appendChild(c);
+
+    // events
+    c.addEventListener('click', () => {
+      if (!c.classList.contains('active')) {
+        focusToIndex(idx, true);
+        return;
+      }
+      // flip active
+      c.classList.toggle('is-flipped');
+    });
+
+    // image load handling
+    img.addEventListener('load', () => {
+      img.dataset.loaded = 'true';
+      // if this card is active, trigger the projection animation
+      if (c.classList.contains('active') && img.dataset.projected !== 'true') {
+        projectImageIn(img, c);
+      } else {
+        // keep invisible until projected; ensure it's ready for when focused
+        img.style.opacity = 0;
+      }
+    });
+    img.addEventListener('error', () => {
+      img.src = svgPlaceholder(ev.title, 900, 600);
+      img.style.objectFit = 'contain';
+    });
+
+    // assign src (start loading)
+    img.src = ev.image;
+
+    cards.push({ root: c, img, poster, idx });
+  });
+
+  // ---------------------------
+  // Layout & focus logic
+  // ---------------------------
+  function layoutCards(rotationDeg = 0){
+    cards.forEach((obj, i) => {
+      const c = obj.root;
+      const angleDeg = (i * baseAngle) + rotationDeg;
+      const rad = angleDeg * Math.PI / 180;
+      const x = Math.sin(rad) * radius;
+      const z = Math.cos(rad) * radius;
+      const rotateY = (angleDeg - rotationDeg) * 0.12;
+      gsap.to(c, {
+        duration: 0.9, ease: "expo.out",
+        x: x, z: z, rotationY: rotateY,
+        onUpdate() {
+          const tx = this.targets()[0]._gsap.x || 0;
+          const tz = this.targets()[0]._gsap.z || 0;
+          const ry = this.targets()[0]._gsap.rotationY || 0;
+          const sc = (i === activeIndex) ? 1.03 : 0.94;
+          c.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${sc})`;
+        }
+      });
+    });
+    // update classes
+    cards.forEach((o, i) => {
+      o.root.classList.toggle('active', i === activeIndex);
+      if (i !== activeIndex) {
+        // ensure non-active are not flipped and images are hidden
+        o.root.classList.remove('is-flipped');
+        gsap.to(o.img, { duration: 0.25, opacity: 0 });
+      }
+    });
+  }
+
+  function focusToIndex(idx, userTriggered=false){
+    activeIndex = ((idx % cards.length) + cards.length) % cards.length;
+    layoutCards(-activeIndex * baseAngle);
+    const activeCard = cards[activeIndex];
+    // small levitate effect
+    gsap.fromTo(activeCard.root, { y: 20 }, { y: 0, duration: 0.9, ease: "elastic.out(1,0.6)" });
+    // ensure image projection: if loaded and not projected -> project
+    if (activeCard.img.dataset.loaded === 'true' && activeCard.img.dataset.projected !== 'true') {
+      projectImageIn(activeCard.img, activeCard.root);
+    } else if (activeCard.img.dataset.loaded !== 'true') {
+      // if not loaded yet, set a small placeholder visible until load; placeholder handled by error handler
+      // But we'll trigger small hint: flash aura and ambient burst
+      createDOMHalo(activeCard.root);
+      triggerBurstOnCard(activeCard.root);
+    }
+    // reset other cards' flips
+    cards.forEach((o,i)=> { if(i!==activeIndex) o.root.classList.remove('is-flipped'); });
+    if (userTriggered) {
+      restartAutoplay();
+    }
+  }
+
+  function goNext(userTriggered=false){ focusToIndex(activeIndex + 1, userTriggered); }
+  function goPrev(userTriggered=false){ focusToIndex(activeIndex - 1, userTriggered); }
+
+  document.getElementById('nextBtn').addEventListener('click', ()=> goNext(true));
+  document.getElementById('prevBtn').addEventListener('click', ()=> goPrev(true));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') goNext(true);
+    if (e.key === 'ArrowLeft') goPrev(true);
+    if (e.key === 'Enter') {
+      const active = cards[activeIndex].root;
+      active.classList.toggle('is-flipped');
+    }
+  });
+  carousel.addEventListener('mouseenter', ()=> stopAutoplay());
+  carousel.addEventListener('mouseleave', ()=> startAutoplay());
+
+  // ---------------------------
+  // Projection animation (image reveal) + flash + triggers burst
+  // ---------------------------
+  function projectImageIn(imgEl, cardRoot){
+    if (!imgEl) return;
+    if (imgEl.dataset.projected === 'true') return;
+    imgEl.dataset.projected = 'true';
+    // ensure visible and reset transforms
+    gsap.set(imgEl, { opacity: 0, scale: 0.88, rotationX: -40, filter: "brightness(0.6) saturate(0.9)" });
+    // create a flash overlay
+    const flash = document.createElement('div');
+    flash.style.position = 'absolute';
+    flash.style.inset = '0';
+    flash.style.background = 'radial-gradient(circle at 50% 30%, rgba(255,255,255,0.92), rgba(255,255,255,0.6) 12%, rgba(255,255,255,0.2) 24%, rgba(0,0,0,0) 60%)';
+    flash.style.pointerEvents = 'none';
+    flash.style.opacity = '0';
+    // append inside poster (safe)
+    const poster = imgEl.parentElement;
+    poster.appendChild(flash);
+
+    // projection timeline
+    const tl = gsap.timeline({
+      onComplete() {
+        // cleanup flash
+        gsap.to(flash, { duration: 0.35, opacity: 0, ease: "power2.out", onComplete: ()=> flash.remove() });
+      }
+    });
+    tl.to(imgEl, { duration: 0.45, opacity: 1, scale: 0.96, rotationX: -15, filter: "brightness(0.95) saturate(1.02)", ease: "expo.out" }, 0);
+    tl.to(imgEl, { duration: 0.5, rotationX: 0, scale: 1, filter: "brightness(1) saturate(1)", ease: "back.out(1.1)" }, 0.28);
+    tl.fromTo(flash, { opacity: 0 }, { duration: 0.14, opacity: 1, ease: "power1.out" }, 0.06);
+    // small pop after projection
+    tl.fromTo(cardRoot, { y:-8 }, { duration: 0.8, y:0, ease: "elastic.out(1,0.6)" }, 0.5);
+
+    // fire burst synced to projection
+    setTimeout(()=> {
+      triggerBurstOnCard(cardRoot);
+      createDOMHalo(cardRoot);
+    }, 220);
+  }
+
+  // ---------------------------
+  // Three.js cinematic flame (kept similar, slightly tamer)
+  // ---------------------------
+  const canvas = document.getElementById('glCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 1, 5000);
+  camera.position.set(0,0,1100);
+  const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(innerWidth, innerHeight);
+
+  // particle sprite
+  function makeSpriteTexture(){
+    const size = 128;
+    const c = document.createElement('canvas'); c.width=c.height=size;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/1.8);
+    g.addColorStop(0, 'rgba(255,255,210,1)');
+    g.addColorStop(0.3, 'rgba(255,200,90,0.85)');
+    g.addColorStop(0.55, 'rgba(255,140,40,0.6)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,size,size);
+    const t = new THREE.CanvasTexture(c); t.needsUpdate = true; return t;
+  }
+  const spriteTex = makeSpriteTexture();
+
+  const MAX = 900;
+  const positions = new Float32Array(MAX*3);
+  const velocities = new Float32Array(MAX*3);
+  const starts = new Float32Array(MAX);
+  const lives = new Float32Array(MAX);
+  const sizes = new Float32Array(MAX);
+  const colors = new Float32Array(MAX*3);
+
+  // init
+  for(let i=0;i<MAX;i++){ positions[i*3]=positions[i*3+1]=positions[i*3+2]=0; velocities[i*3]=velocities[i*3+1]=velocities[i*3+2]=0; starts[i]= -9999; lives[i]=0.8 + Math.random()*0.9; sizes[i]= 4 + Math.random()*22; colors[i*3]=1; colors[i*3+1]=0.62; colors[i*3+2]=0.32; }
+
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.BufferAttribute(positions,3).setUsage(THREE.DynamicDrawUsage));
+  geom.setAttribute('aVelocity', new THREE.BufferAttribute(velocities,3).setUsage(THREE.DynamicDrawUsage));
+  geom.setAttribute('aStart', new THREE.BufferAttribute(starts,1).setUsage(THREE.DynamicDrawUsage));
+  geom.setAttribute('aLife', new THREE.BufferAttribute(lives,1).setUsage(THREE.DynamicDrawUsage));
+  geom.setAttribute('aSize', new THREE.BufferAttribute(sizes,1).setUsage(THREE.DynamicDrawUsage));
+  geom.setAttribute('aColor', new THREE.BufferAttribute(colors,3).setUsage(THREE.DynamicDrawUsage));
+  geom.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 10000);
+
+  const mat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    uniforms: { uTime: { value: performance.now()/1000 }, uPixelRatio: { value: DPR }, uScale: { value: Math.min(innerWidth, innerHeight)/900 }, uSprite: { value: spriteTex } },
+    vertexShader: `
+      attribute vec3 aVelocity; attribute float aStart; attribute float aLife; attribute float aSize; attribute vec3 aColor;
+      varying float vAlpha; varying vec3 vColor; uniform float uTime; uniform float uScale; uniform float uPixelRatio;
+      void main(){
+        float age = uTime - aStart;
+        if(age < 0.0 || age > aLife){ vAlpha = 0.0; }
+        else { float lifePct = age / aLife; vAlpha = 1.0 - smoothstep(0.0, 1.0, lifePct); }
+        vec3 pos = position;
+        if(age > 0.0){ pos += aVelocity * age * 0.6; pos.y += 8.0 * age * age; }
+        vColor = aColor;
+        vec4 mv = modelViewMatrix * vec4(pos,1.0);
+        gl_PointSize = aSize * uScale * (200.0 / -mv.z) * uPixelRatio;
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D uSprite; varying float vAlpha; varying vec3 vColor;
+      void main(){
+        vec4 t = texture2D(uSprite, gl_PointCoord);
+        float a = t.a * vAlpha;
+        gl_FragColor = vec4(vColor * t.rgb, a * 0.9);
+      }
+    `
+  });
+
+  const points = new THREE.Points(geom, mat); scene.add(points);
+
+  function allocate(n){
+    const idxs = [];
+    for(let i=0;i<MAX && idxs.length<n;i++){
+      if (starts[i] + lives[i] < performance.now()/1000 - 0.05) idxs.push(i);
+    }
+    return idxs;
+  }
+
+  function spawnBurstAtWorld(worldVec, count=64, color=[1,0.65,0.35]){
+    const idxs = allocate(count);
+    const now = performance.now()/1000;
+    idxs.forEach(i=>{
+      positions[i*3] = worldVec.x + (Math.random()-0.5)*16;
+      positions[i*3+1] = worldVec.y + (Math.random()-0.5)*10;
+      positions[i*3+2] = worldVec.z + (Math.random()-0.5)*16;
+      velocities[i*3] = (Math.random()-0.5) * (8 + Math.random()*22);
+      velocities[i*3+1] = (6 + Math.random()*30);
+      velocities[i*3+2] = (Math.random()-0.5) * (8 + Math.random()*22);
+      starts[i] = now + Math.random()*0.02;
+      lives[i] = 0.6 + Math.random()*0.9;
+      sizes[i] = 4 + Math.random()*26;
+      colors[i*3]=color[0]; colors[i*3+1]=color[1]; colors[i*3+2]=color[2];
+    });
+    geom.attributes.position.needsUpdate = true;
+    geom.attributes.aVelocity.needsUpdate = true;
+    geom.attributes.aStart.needsUpdate = true;
+    geom.attributes.aLife.needsUpdate = true;
+    geom.attributes.aSize.needsUpdate = true;
+    geom.attributes.aColor.needsUpdate = true;
+  }
+
+  function getCardWorldPosition(cardRoot){
+    const rect = cardRoot.getBoundingClientRect();
+    const x = rect.left + rect.width/2;
+    const y = rect.top + rect.height*0.68;
+    const ndcX = (x / innerWidth) * 2 - 1;
+    const ndcY = - (y / innerHeight) * 2 + 1;
+    const vec = new THREE.Vector3(ndcX, ndcY, 0.3).unproject(camera);
+    return vec;
+  }
+
+  // trigger burst and DOM halo
+  function triggerBurstOnCard(cardRoot){
+    const world = getCardWorldPosition(cardRoot);
+    spawnBurstAtWorld(world, 76, [1.0, 0.62, 0.35]);
+    setTimeout(()=> spawnBurstAtWorld(world, 36, [1.0,0.75,0.45]), 120);
+    createDOMHalo(cardRoot);
+  }
+
+  function createDOMHalo(card){
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const r = Math.max(rect.width, rect.height) * 0.75;
+    const svgNS = "http://www.w3.org/2000/svg";
+    const el = document.createElementNS(svgNS, 'circle');
+    el.setAttribute('cx', cx); el.setAttribute('cy', cy); el.setAttribute('r', r);
+    el.setAttribute('fill', 'none'); el.setAttribute('stroke', 'rgba(255,120,100,0.16)'); el.setAttribute('stroke-width', '18');
+    // append to a temporary svg overlay (we don't have that in this variant; create ephemeral element)
+    const temp = document.createElement('div');
+    temp.style.position = 'fixed'; temp.style.left = 0; temp.style.top = 0; temp.style.pointerEvents = 'none'; temp.style.zIndex = 3;
+    temp.appendChild(el);
+    document.body.appendChild(temp);
+    gsap.fromTo(el, { r: r*0.65, opacity:1 }, { duration:1.2, r: r*1.15, opacity:0, ease:'power2.out', onComplete: ()=> temp.remove() });
+  }
+
+  // animate loop
+  let last = performance.now()/1000;
+  function animate(){
+    const t = performance.now()/1000;
+    const dt = Math.min(0.06, t - last);
+    last = t;
+    mat.uniforms.uTime.value = t;
+    // very simple CPU update for positions using velocities
+    for(let i=0;i<MAX;i++){
+      if (t < starts[i] || t > starts[i] + lives[i]) continue;
+      positions[i*3] += velocities[i*3] * dt;
+      positions[i*3+1] += velocities[i*3+1] * dt;
+      positions[i*3+2] += velocities[i*3+2] * dt;
+      velocities[i*3] *= (1 - 1.0*dt);
+      velocities[i*3+1] += 8 * dt;
+      velocities[i*3+2] *= (1 - 1.0*dt);
+    }
+    geom.attributes.position.needsUpdate = true;
+    renderer.render(scene, camera);
+
+    // simple DOM embers drawing to blend
+    drawDOMEmbers();
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // ---------------------------
+  // DOM embers
+  // ---------------------------
+  const dem = document.getElementById('domEmbers');
+  const dctx = dem.getContext('2d');
+  function resizeDomEmbers(){ dem.width = innerWidth; dem.height = innerHeight; }
+  resizeDomEmbers();
+  window.addEventListener('resize', ()=> { resizeDomEmbers(); resizeRenderer(); layoutCards(-activeIndex*baseAngle); });
+
+  function drawDOMEmbers(){
+    dctx.clearRect(0,0,dem.width,dem.height);
+    const cnt = 6;
+    for(let i=0;i<cnt;i++){
+      const x = innerWidth * (0.3 + 0.4*Math.random());
+      const y = innerHeight * (0.68 + 0.2*Math.random());
+      const r = 2 + Math.random()*8;
+      const a = 0.02 + Math.random()*0.06;
+      dctx.beginPath();
+      dctx.fillStyle = `rgba(255,${120+Math.floor(Math.random()*80)},${30+Math.floor(Math.random()*40)},${a})`;
+      dctx.arc(x,y,r,0,Math.PI*2);
+      dctx.fill();
+    }
+  }
+
+  function resizeRenderer(){
+    const w = innerWidth, h = innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+    mat.uniforms.uPixelRatio.value = DPR;
+    mat.uniforms.uScale.value = Math.min(w,h)/900;
+  }
+  resizeRenderer();
+
+  // ---------------------------
+  // Autoplay
+  // ---------------------------
+  function startAutoplay(){ stopAutoplay(); autoplayTimer = setInterval(()=> goNext(true), AUTOPLAY_INTERVAL); }
+  function stopAutoplay(){ if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; } }
+  function restartAutoplay(){ stopAutoplay(); startAutoplay(); }
+  startAutoplay();
+
+  // ---------------------------
+  // Initial entrance & focus
+  // ---------------------------
+  setTimeout(()=> {
+    focusToIndex(0);
+    // if image already loaded for index 0 then project immediately
+    const firstImg = cards[0].img;
+    if (firstImg.complete && firstImg.dataset.loaded !== 'true') {
+      // force mark loaded & project
+      firstImg.dispatchEvent(new Event('load'));
+    }
+  }, 320);
+
+  // Pause autoplay on tab hidden
+  document.addEventListener('visibilitychange', ()=> {
+    if (document.hidden) stopAutoplay(); else startAutoplay();
+  });
+  // expose for debugging
+  window.focusToIndex = focusToIndex; window.goNext = goNext; window.goPrev = goPrev;
+
+  </script>
 </body>
 </html>
-
