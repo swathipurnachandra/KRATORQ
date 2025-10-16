@@ -1,442 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    background: transparent;
-    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    color: var(--muted);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-family: 'Poppins', sans-serif;
+  background: url('../Images/Background2.jpg') no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  color: #fff;
+  overflow-x: hidden;
 }
 
-/* --- add variables and small defaults --- */
-:root {
-    --accent: #ff4b33;
-    /* stronger red-orange */
-    --white: #ffffff;
-    --muted: rgba(255, 255, 255, 0.92);
-    --card-bg: rgba(0, 0, 0, 0.56);
-    --card-border: rgba(255, 75, 51, 0.08);
-    --max-width: 1300px;
+/* Overlay to make text visible on dark background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 0, 10, 0.7);
+  z-index: -1;
 }
 
-/* Background */
-.bg-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    z-index: -2;
-    /* keep further back */
-    overflow: hidden;
+header {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: rgba(20, 0, 30, 0.6);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid rgba(255, 0, 50, 0.3);
+  box-shadow: 0 4px 25px rgba(255, 0, 0, 0.15);
 }
 
-.background-overlay {
-    width: 100%;
-    height: 100vh;
+header h1 {
+  font-size: 2.5rem;
+  color: #ff3b3b;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
 }
 
-.overlay-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-    filter: contrast(1.05) saturate(1.05) brightness(0.95);
-    opacity: 0.95;
+header p {
+  color: #ddd;
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
 }
 
-/* Main poster layout */
-.main-container {
-    width: 100%;
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 90px 20px 48px;
-    /* more top padding to match poster/title positioning */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 28px;
-    box-sizing: border-box;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    /* ensure visible above bg */
+.event-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 3rem;
+  max-width: 1300px;
+  margin: auto;
 }
 
-/* Center logos */
-.header-logos {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-    justify-content: center;
+.event-card {
+  background: rgba(25, 0, 35, 0.7);
+  border: 1px solid rgba(255, 0, 60, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(255, 0, 50, 0.15);
+  backdrop-filter: blur(6px);
 }
 
-.logo {
-    height: 56px;
-    width: auto;
-    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.6));
+.event-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 30px rgba(255, 50, 50, 0.3);
+  border-color: rgba(255, 80, 80, 0.7);
 }
 
-/* Top row: center the poster and title/countdown as a single centered block */
-.top-row {
-    /* increase poster column and keep a balanced right column for title/countdown */
-    max-width: calc(var(--max-width) - 40px);
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    /* bigger poster column */
-    gap: 28px;
-    align-items: center;
-    justify-items: center;
-    margin-top: 6px;
-    padding: 0 8px;
-    box-sizing: border-box;
+.event-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-bottom: 3px solid #ff3b3b;
 }
 
-/* Poster sizing and centering */
-.top-poster {
-    width: 420px;
-    /* larger on wide screens */
-    max-width: 44%;
-    border-radius: 10px;
-    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.65);
-    border: 6px solid rgba(0, 0, 0, 0.28);
-    /* subtle frame to separate from bg */
-    object-fit: cover;
-    display: block;
+.event-content {
+  padding: 1.5rem;
 }
 
-/* Title and countdown centered */
-.title-countdown {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding-top: 8px;
-    box-sizing: border-box;
+.event-content h2 {
+  color: #ff4d4d;
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
 }
 
-/* punchy main title */
-.event-title h1 {
-    font-size: clamp(38px, 6.8vw, 76px);
-    color: var(--accent);
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    margin: 0 0 6px;
-    font-weight: 800;
-    text-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+.event-content h3 {
+  color: #ffb3b3;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  font-style: italic;
 }
 
-/* Countdown centered and wrapped */
-.countdown,
-.top-countdown {
-    display: flex;
-    gap: 18px;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 6px;
+.event-content p {
+  font-size: 0.95rem;
+  color: #e6e6e6;
+  line-height: 1.5;
 }
 
-/* Countdown boxes */
-.countdown-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Contact Section */
+.contact-section {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: rgba(20, 0, 30, 0.6);
+  border-top: 2px solid rgba(255, 0, 60, 0.3);
+  backdrop-filter: blur(8px);
 }
 
-.countdown-item span {
-    min-width: 96px;
-    padding: 12px 14px;
-    font-size: clamp(20px, 4.4vw, 44px);
-    font-weight: 900;
-    border-radius: 12px;
-    background: #fff;
-    color: #111;
-    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+.contact-container {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* seconds accent more visible */
-#seconds {
-    color: var(--accent);
+.contact-container h2 {
+  font-size: 1.8rem;
+  color: #ff3b3b;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 }
 
-/* small label under each pill */
-.countdown-item .label {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.85rem;
-    margin-top: 8px;
-    letter-spacing: 1px;
+.contact-details {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
-/* SECTION HEADING */
-.section-heading {
-    font-family: "Impact", "Arial Black", sans-serif;
-    font-size: clamp(20px, 3vw, 36px);
-    letter-spacing: 3px;
-    color: #fff;
-    margin: 42px 0 18px;
-    padding-bottom: 10px;
-    text-align: center;
-    position: relative;
+.contact-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 0, 50, 0.3);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  flex: 1 1 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.section-heading::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: -6px;
-    width: 320px;
-    height: 5px;
-    background: linear-gradient(90deg, var(--accent), rgba(255, 255, 255, 0.18));
-    border-radius: 2px;
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(255, 50, 50, 0.3);
 }
 
-/* EVENTS ROW: left poster + right description flow */
-.events-row {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 48px;
-    align-items: center;
-    justify-items: center;
-    padding: 0 8px;
+.contact-card h3 {
+  color: #ff4d4d;
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
 }
 
-/* posters */
-.left-poster,
-.th-poster {
-    max-width: 380px;
-    border-radius: 12px;
-    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.6);
+.contact-card p {
+  color: #ddd;
+  font-size: 1rem;
+  margin: 0.3rem 0;
 }
 
-/* event card overlay panel */
-.event-card-flow {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.44));
-    padding: 32px;
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-    max-width: 820px;
-    text-align: center;
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: #bbb;
+  background: rgba(10, 0, 20, 0.7);
+  border-top: 1px solid rgba(255, 0, 50, 0.3);
+  font-size: 0.9rem;
+  backdrop-filter: blur(5px);
 }
 
-.event-card-flow h3 {
-    font-size: clamp(20px, 2.8vw, 30px);
-    margin-bottom: 14px;
-    color: var(--accent);
-}
+/* Mobile-first responsiveness */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2rem;
+  }
 
-.event-card-flow p {
-    font-size: clamp(15px, 1.8vw, 18px);
-    line-height: 1.7;
-    color: #f2f2f2;
-    margin-bottom: 18px;
-}
+  .event-container {
+    padding: 2rem 1rem;
+  }
 
-/* Register button (consistent, prominent) */
-.register-btn {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 10px 22px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform .14s ease, box-shadow .14s ease;
-}
+  .contact-container h2 {
+    font-size: 1.5rem;
+  }
 
-.register-btn:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(255, 107, 51, 0.18);
-}
-
-/* TH section reuse styles (keeps same flow) */
-.th-section {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 36px;
-    justify-items: center;
-    align-items: center;
-    padding: 0 8px;
-    box-sizing: border-box;
-}
-
-.th-content {
-    text-align: center;
-}
-
-/* Contact links centered and compact */
-.contact-links {
-    display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-
-.contact-links a {
-    color: #fff;
-    text-decoration: none;
-    padding: 8px 14px;
-    font-size: 0.95rem;
-    background: rgba(0, 0, 0, 0.35);
-    border-radius: 8px;
-}
-
-/* Make images safe for all viewports */
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* institute info centered and slightly muted */
-.institute-info {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.92);
-    line-height: 1.15;
-}
-
-.institute-info h2 {
-    font-size: 0.95rem;
-    letter-spacing: 1.6px;
-    margin-bottom: 4px;
-    font-weight: 600;
-}
-
-.institute-info h3 {
-    font-size: 0.9rem;
-    color: rgba(235, 235, 235, 0.85);
-    margin-bottom: 6px;
-}
-
-.institute-info .present {
-    margin-top: 6px;
-    color: rgba(255, 200, 200, 0.9);
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-/* --- responsive adjustments --- */
-@media (max-width: 1000px) {
-    .top-row {
-        grid-template-columns: 260px 1fr;
-    }
-
-    .top-poster {
-        width: 260px;
-    }
-
-    .events-row {
-        grid-template-columns: 1fr;
-        gap: 28px;
-    }
-
-    .th-section {
-        grid-template-columns: 1fr;
-    }
-
-    .main-container {
-        padding-top: 64px;
-    }
-}
-
-@media (max-width: 740px) {
-    .top-row {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        padding: 0 12px;
-    }
-
-    .top-poster {
-        width: 180px;
-    }
-
-    .event-title h1 {
-        font-size: clamp(28px, 9vw, 44px);
-        letter-spacing: 3px;
-    }
-
-    .countdown-item span {
-        min-width: 72px;
-        padding: 10px 8px;
-        font-size: clamp(16px, 5.8vw, 30px);
-    }
-
-    .event-card-flow {
-        padding: 22px;
-    }
-}
-
-@media (max-width: 440px) {
-    .top-poster {
-        width: 140px;
-    }
-
-    .event-card-flow p {
-        font-size: 14px;
-        line-height: 1.5;
-    }
-
-    .section-heading::after {
-        width: 180px;
-    }
-}
-
-@media (max-width: 1100px) {
-    .top-row {
-        grid-template-columns: 360px 1fr;
-        gap: 22px;
-    }
-
-    .top-poster {
-        width: 360px;
-        max-width: 42%;
-    }
-
-    .countdown-item span {
-        min-width: 86px;
-        font-size: clamp(18px, 4.0vw, 36px);
-    }
-}
-
-@media (max-width: 820px) {
-
-    /* stack poster above title/countdown on narrow screens */
-    .top-row {
-        grid-template-columns: 1fr;
-        justify-items: center;
-    }
-
-    .top-poster {
-        width: 220px;
-        max-width: 56%;
-    }
-
-    .countdown-item span {
-        min-width: 72px;
-        font-size: clamp(16px, 6.2vw, 30px);
-    }
-}
-
-@media (max-width: 440px) {
-    .top-poster {
-        width: 160px;
-        max-width: 52%;
-        border-width: 4px;
-    }
-
-    .countdown-item span {
-        min-width: 60px;
-        padding: 8px 10px;
-        font-size: 14px;
-    }
+  .contact-card {
+    flex: 1 1 100%;
+  }
 }
