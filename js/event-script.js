@@ -4,7 +4,8 @@ const events = [
     tagline: "Present. Persuade. Inspire.",
     description:
       "Showcase your innovative engineering ideas, research, and problem-solving skills to a panel of experts. Whether it’s a novel design, breakthrough experiment, or futuristic concept — this is your platform to share, learn, and shine among the brightest minds.",
-    image: "images/paper-presentation.jpg",
+    image: "Images/pp.png",
+    formLink: "https://forms.gle/YOUR_FORM_LINK", // 🔗 add Google Form link
   },
   {
     title: "Auto Quiz",
@@ -12,6 +13,7 @@ const events = [
     description:
       "Challenge your knowledge of automobiles, engines, and modern mobility. From mechanical fundamentals to the latest automotive innovations, this quiz will test how fast your mind can shift gears.",
     image: "images/auto-quiz.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "Engineering MUN (Model United Nations)",
@@ -19,6 +21,7 @@ const events = [
     description:
       "Step into the shoes of world engineers, leaders, and technocrats. Debate and design solutions for global engineering challenges through diplomacy, logic, and creative thinking.",
     image: "images/engineering-mun.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "Pit Stop Challenge – F1 Ideathon",
@@ -26,13 +29,15 @@ const events = [
     description:
       "Ideate and design F1-inspired concepts — from pit stop efficiency to performance engineering. Collaborate, strategize, and race your way to victory in this high-octane ideathon.",
     image: "images/pit-stop.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "Treasure Hunt",
     tagline: "Decode. Discover. Dominate.",
     description:
       "Follow the clues, crack the codes, and race across campus in this thrilling adventure. Teamwork, intuition, and speed will be your keys to the treasure.",
-    image: "images/treasure-hunt.jpg",
+    image: "images/th.png",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "F1 Logo Design",
@@ -40,6 +45,7 @@ const events = [
     description:
       "Showcase your creativity by crafting a dynamic Formula 1–inspired logo that captures the essence of power, motion, and precision.",
     image: "images/f1-logo.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "IPL Auction",
@@ -47,6 +53,7 @@ const events = [
     description:
       "Step into the role of an IPL franchise owner. Analyze players, manage your budget, and strategize your bids to form the ultimate dream team.",
     image: "images/ipl-auction.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "BGMI Tournament",
@@ -54,6 +61,7 @@ const events = [
     description:
       "Compete in high-stakes BGMI matches where strategy, reflex, and teamwork decide the champion. Only the last squad standing claims the crown.",
     image: "images/bgmi.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "Free Fire Tournament",
@@ -61,6 +69,7 @@ const events = [
     description:
       "Jump into an intense Free Fire battle where every second counts. Outsmart and outplay your opponents to prove your dominance.",
     image: "images/free-fire.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
   {
     title: "Box Football (Individual Event)",
@@ -68,6 +77,7 @@ const events = [
     description:
       "A thrilling one-on-one football showdown where agility, speed, and control decide the winner. Every goal brings you closer to victory.",
     image: "images/box-football.jpg",
+    formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
 ];
 
@@ -76,30 +86,38 @@ const eventContainer = document.getElementById("eventContainer");
 events.forEach((event) => {
   const card = document.createElement("div");
   card.classList.add("event-card");
+
   card.innerHTML = `
     <img src="${event.image}" alt="${event.title}" class="event-img" />
     <div class="event-content">
       <h2>${event.title}</h2>
       <h3>${event.tagline}</h3>
-      <p>${event.description}</p>
+
+      <button class="dropdown-btn">View Details ⮟</button>
+
+      <div class="event-description">
+        <p>${event.description}</p>
+
+        <!-- Register Button -->
+        <a href="${event.formLink}" 
+           class="register-btn" 
+           target="_blank">
+           Register Now
+        </a>
+      </div>
     </div>
   `;
+
   eventContainer.appendChild(card);
 });
 
-document.getElementById("contactForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-  alert("Thank you for contacting us! We'll get back to you soon.");
-  this.reset();
+// Toggle dropdowns
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("dropdown-btn")) {
+    const desc = e.target.nextElementSibling;
+    desc.classList.toggle("show");
+    e.target.textContent = desc.classList.contains("show")
+      ? "Hide Details ⮝"
+      : "View Details ⮟";
+  }
 });
-// Toggle event details visibility
-const dropdownButtons = document.querySelectorAll('.dropdown-btn');
-
-dropdownButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const details = button.nextElementSibling;
-    details.classList.toggle('show');
-  });
-});
-
-
