@@ -4,79 +4,79 @@ const events = [
     tagline: "Present. Persuade. Inspire.",
     description:
       "Showcase your innovative engineering ideas, research, and problem-solving skills to a panel of experts. Whether it’s a novel design, breakthrough experiment, or futuristic concept — this is your platform to share, learn, and shine among the brightest minds.",
-    image: "Images/pp.png",
-    formLink: "https://forms.gle/YOUR_FORM_LINK", // 🔗 add Google Form link
+    image: "Images/4.jpg",
+    formLink: "https://forms.gle/c3hbLbrcjXT13TYq6", // 🔗 add Google Form link
   },
   {
     title: "Auto Quiz",
     tagline: "Rev your brains, not your engines.",
     description:
       "Challenge your knowledge of automobiles, engines, and modern mobility. From mechanical fundamentals to the latest automotive innovations, this quiz will test how fast your mind can shift gears.",
-    image: "images/auto-quiz.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/10.jpg",
+    formLink: "https://forms.gle/74zHrYH3jNyVgNcu8",
   },
   {
-    title: "Engineering MUN (Model United Nations)",
+    title: "Tech MUN (Model United Nations)",
     tagline: "Where policy meets innovation.",
     description:
       "Step into the shoes of world engineers, leaders, and technocrats. Debate and design solutions for global engineering challenges through diplomacy, logic, and creative thinking.",
-    image: "images/engineering-mun.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/3.jpg",
+    formLink: "https://forms.gle/DXBEwDs91dHJBrAD8 ",
   },
   {
     title: "Pit Stop Challenge – F1 Ideathon",
     tagline: "Think like an engineer, act like a racer.",
     description:
       "Ideate and design F1-inspired concepts — from pit stop efficiency to performance engineering. Collaborate, strategize, and race your way to victory in this high-octane ideathon.",
-    image: "images/pit-stop.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/1.jpg",
+    formLink: "https://forms.gle/eCn8NrjFgqjExXpSA",
   },
   {
     title: "Treasure Hunt",
     tagline: "Decode. Discover. Dominate.",
     description:
       "Follow the clues, crack the codes, and race across campus in this thrilling adventure. Teamwork, intuition, and speed will be your keys to the treasure.",
-    image: "images/th.png",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/8.jpg",
+    formLink: "https://forms.gle/uAywoEBSUDKLL5kU9",
   },
   {
     title: "F1 Logo Design",
     tagline: "Design the symbol of speed.",
     description:
       "Showcase your creativity by crafting a dynamic Formula 1–inspired logo that captures the essence of power, motion, and precision.",
-    image: "images/f1-logo.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/2.jpg",
+    formLink: "https://forms.gle/yayPpaXHeXvjQPJr8",
   },
   {
     title: "IPL Auction",
     tagline: "Bid. Build. Win.",
     description:
       "Step into the role of an IPL franchise owner. Analyze players, manage your budget, and strategize your bids to form the ultimate dream team.",
-    image: "images/ipl-auction.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/9.jpg",
+    formLink: "https://forms.gle/UBLiVgGa4QiZAFaF6",
   },
   {
     title: "BGMI Tournament",
     tagline: "Aim. Fire. Survive.",
     description:
       "Compete in high-stakes BGMI matches where strategy, reflex, and teamwork decide the champion. Only the last squad standing claims the crown.",
-    image: "images/bgmi.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/7.jpg",
+    formLink: "https://forms.gle/9VQHLDqTCv1xv8iD7",
   },
   {
     title: "Free Fire Tournament",
     tagline: "One shot to glory.",
     description:
       "Jump into an intense Free Fire battle where every second counts. Outsmart and outplay your opponents to prove your dominance.",
-    image: "images/free-fire.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    image: "images/6.jpg",
+    formLink: "https://forms.gle/L1ognat6gAnZhReL8",
   },
   {
     title: "Box Football (Individual Event)",
     tagline: "Small space, big skills.",
     description:
       "A thrilling one-on-one football showdown where agility, speed, and control decide the winner. Every goal brings you closer to victory.",
-    image: "images/box-football.jpg",
+    image: "images/5.jpg",
     formLink: "https://forms.gle/YOUR_FORM_LINK",
   },
 ];
