@@ -29,7 +29,13 @@
       --font-primary: 'Orbitron','Exo 2','Rajdhani',monospace;
       --font-secondary: 'Exo 2','Rajdhani',sans-serif;
 
-      --robot-size: min(600px, 90vw);
+      /* UI zoom scale (updated via JS when zoom/devicePixelRatio changes) */
+      --ui-scale: 1;
+
+      /* base sizes (viewport-relative) — final sizes multiply by --ui-scale */
+      --robot-base: min(600px, 90vw);
+      --hero-width-base: min(900px, 85vw);
+      --robot-size: calc(var(--robot-base) * var(--ui-scale));
       --title-size: clamp(3rem, 10vw, 5rem);
       --subtitle-size: clamp(1rem, 3.5vw, 1.4rem);
     }
@@ -188,6 +194,31 @@
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
     }
+
+    /* Mobile robot-top layout: pinned small robot near top so hero stays centered */
+    .mobile-robot-top{
+      position: fixed !important;
+      top: 6vh !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      z-index: 45 !important;
+      pointer-events: none;
+      width: auto !important;
+    }
+    .mobile-robot-top .robot-wrap{
+      transform: scale(0.55) !important;
+      width: calc(var(--robot-size) * 0.6) !important;
+      height: calc(var(--robot-size) * 0.6) !important;
+      filter: drop-shadow(0 0 30px rgba(255,69,0,0.45)) !important;
+      animation-play-state: paused !important;
+    }
+
+    /* Slightly lift hero-card on very small screens so it feels centred visually */
+    .hero-card.mobile-centered{
+      top: 52% !important;
+      transform: translate(-50%,-50%) !important;
+      z-index: 60 !important;
+    }
   </style>
 </head>
 <body>
@@ -231,10 +262,47 @@
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let hasActivated = false;
 
+    // ---------- NEW: graceful zoom/scale adaptation ----------
+    // Updates --ui-scale in :root so sizes are multiplied and layout adapts to zoom.
+    (function(){
+      let lastDPR = window.devicePixelRatio || 1;
+      const root = document.documentElement;
+      const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+      function computeUiScale(dpr){
+        // When DPR increases due to zoom, shrink UI slightly to keep composition.
+        // For normal HiDPI (small dpr >1) we avoid heavy shrink; clamp to comfortable range.
+        let scale = dpr > 1 ? 1 / dpr : 1;
+        return clamp(scale, 0.75, 1.06);
+      }
+
+      function updateUiScale(){
+        const dpr = window.devicePixelRatio || 1;
+        if (Math.abs(dpr - lastDPR) < 0.02) return; // tiny changes ignored
+        lastDPR = dpr;
+        const uiScale = computeUiScale(dpr);
+        root.style.setProperty('--ui-scale', uiScale.toFixed(4));
+      }
+
+      // prefer visualViewport where available; fires on pinch/zoom on mobile and desktop
+      if (window.visualViewport){
+        window.visualViewport.addEventListener('resize', debounce(updateUiScale, 120));
+      }
+      window.addEventListener('resize', debounce(updateUiScale, 120));
+      // poll devicePixelRatio changes for browsers that don't emit events
+      setInterval(updateUiScale, 400);
+      // initial set
+      updateUiScale();
+    })();
+    // ---------- END NEW ----------
+
     function initContinuousRobotAnimations(){
       if(prefersReducedMotion) return;
       const robotWrap = document.getElementById('robotWrap');
       const hero3d = document.querySelector('.hero-3d');
+
+      // Ensure transform-origin is centered for predictable scaling when UI scale changes
+      gsap.set(robotWrap, { transformOrigin: "50% 50%" });
 
       function randomMovement(){
         const tl = gsap.timeline({ repeat:-1, repeatDelay: Math.random()*2 });
@@ -438,12 +506,76 @@
       activateButton.addEventListener('click', triggerActivation);
     }
 
+    // ---------- ADDED: mobile detection & layout toggle ----------
+    let mobileLayoutApplied = false;
+    function isMobileViewport(){
+      return window.innerWidth <= 768 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    // Debounce helper for resize
+    function debounce(fn, wait){
+      let t;
+      return function(...args){
+        clearTimeout(t);
+        t = setTimeout(()=> fn.apply(this, args), wait);
+      };
+    }
+
+    function applyMobileLayout(){
+      if(prefersReducedMotion) return;
+      const robotSection = document.getElementById('robotSection');
+      const robotWrap = document.getElementById('robotWrap');
+      const heroCard = document.getElementById('heroCard');
+
+      // Add class that pins robot to top and shrink it
+      robotSection.classList.add('mobile-robot-top');
+      heroCard.classList.add('mobile-centered');
+
+      // Smooth scale via GSAP for better visual transition
+      gsap.to(robotWrap, { scale: 0.55, duration: 0.5, ease: "power2.out" });
+      // Ensure robot wrap transform origin is centered
+      gsap.set(robotWrap, { transformOrigin: "50% 50%" });
+
+      mobileLayoutApplied = true;
+    }
+
+    function resetDesktopLayout(){
+      if(prefersReducedMotion) return;
+      const robotSection = document.getElementById('robotSection');
+      const robotWrap = document.getElementById('robotWrap');
+      const heroCard = document.getElementById('heroCard');
+
+      robotSection.classList.remove('mobile-robot-top');
+      heroCard.classList.remove('mobile-centered');
+
+      gsap.to(robotWrap, { scale: 1, duration: 0.45, ease: "power2.out" });
+      gsap.set(robotWrap, { transformOrigin: "50% 50%" });
+
+      mobileLayoutApplied = false;
+    }
+
+    function evaluateMobileLayout(){
+      const mobile = isMobileViewport();
+      if(mobile && !mobileLayoutApplied){
+        applyMobileLayout();
+      } else if(!mobile && mobileLayoutApplied){
+        resetDesktopLayout();
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       createEmberParticles();
       initEngageButton();
       initContinuousRobotAnimations();
       initActivationButton();
+
+      // initial evaluation
+      evaluateMobileLayout();
+
+      // re-evaluate on resize (debounced)
+      window.addEventListener('resize', debounce(evaluateMobileLayout, 150));
     });
+    // ---------- END ADDED ----------
   </script>
 </body>
 </html>
