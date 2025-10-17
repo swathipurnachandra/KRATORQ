@@ -317,7 +317,7 @@
     }
     
     .control-btn::before {
-      content:'',
+      content: '';
       position:absolute;
       inset:0;
       border-radius:50%;
@@ -441,7 +441,7 @@
 
   <header>
     <h1>KRATORQ'2025</h1>
-    <p></p>
+    <p>Engineering fest • Events • Competitions</p>
   </header>
 
   <main class="scene-wrap">
@@ -513,10 +513,22 @@
 
   function svgPlaceholder(title, w=900, h=630){
     const escaped = title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const svg = <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#0b0710"/><stop offset="1" stop-color="#15081a"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><text x="50%" y="45%" fill="#ff6b6b" font-family="Poppins, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="middle">${escaped}</text><text x="50%" y="58%" fill="#ffd5d8" font-family="Poppins, sans-serif" font-size="16" text-anchor="middle" dominant-baseline="middle">Loading...</text></svg>;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#0b0710"/>
+          <stop offset="1" stop-color="#15081a"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+      <text x="50%" y="45%" fill="#ff6b6b" font-family="Poppins, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="middle">${escaped}</text>
+      <text x="50%" y="58%" fill="#ffd5d8" font-family="Poppins, sans-serif" font-size="16" text-anchor="middle" dominant-baseline="middle">Loading...</text>
+    </svg>`;
+
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   }
 
+  // Build cards
   events.forEach((ev, idx) => {
     const c = document.createElement('div'); 
     c.className = 'event-card'; 
@@ -561,7 +573,7 @@
     
     const dropdownToggle = document.createElement('button');
     dropdownToggle.className = 'dropdown-toggle';
-    dropdownToggle.innerHTML = <span>${ev.tagline}</span><span class="arrow">▼</span>;
+    dropdownToggle.innerHTML = `<span>${ev.tagline}</span><span class="arrow">▼</span>`;
     
     const dropdownContent = document.createElement('div');
     dropdownContent.className = 'dropdown-content';
@@ -601,20 +613,26 @@
     cards.push({ root: c, img, poster, idx, imagePath: ev.image, dropdownToggle, dropdownContent });
   });
 
+  // After all images attempted to load, set image srcs (real or placeholder), then initialize carousel
   Promise.all(imageLoadPromises).then(() => {
     cards.forEach(obj => {
       const cached = imageCache.get(obj.imagePath);
-      if (cached) {
+      if (cached && cached.src) {
         obj.img.src = cached.src;
-        setTimeout(() => {
-          obj.img.classList.add('loaded');
-        }, 50);
+        // ensure loaded class appears after a tick for transition
+        setTimeout(() => obj.img.classList.add('loaded'), 50);
       } else {
         obj.img.src = svgPlaceholder(events[obj.idx].title, 900, 630);
         obj.img.style.objectFit = 'contain';
         obj.img.classList.add('loaded');
       }
     });
+
+    // initial layout & autoplay start
+    setTimeout(()=> {
+      focusToIndex(0);
+      startAutoplay();
+    }, 250);
   });
 
   function layoutCards(rotationDeg = 0){
@@ -627,14 +645,13 @@
       
       const isActive = (i === activeIndex);
       const scale = isActive ? 1.05 : 0.88;
-      const finalTransform = translateX(${x}px) translateZ(${z}px) scale(${scale});
-      
+      const finalTransform = `translateX(${x}px) translateZ(${z}px) scale(${scale})`;
+
+      // Animate transform via GSAP (use css property)
       gsap.to(c, {
         duration: 0.85, 
         ease: "expo.out",
-        onUpdate() {
-          c.style.transform = finalTransform;
-        }
+        css: { transform: finalTransform }
       });
       
       c.classList.toggle('active', isActive);
@@ -690,13 +707,6 @@
   function stopAutoplay(){ if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; } }
   function restartAutoplay(){ stopAutoplay(); startAutoplay(); }
   
-  Promise.all(imageLoadPromises).then(() => {
-    setTimeout(()=> {
-      focusToIndex(0);
-      startAutoplay();
-    }, 250);
-  });
-
   document.addEventListener('visibilitychange', ()=> {
     if (document.hidden) stopAutoplay(); else startAutoplay();
   });

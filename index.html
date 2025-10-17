@@ -76,15 +76,14 @@
       will-change: transform;
     }
 
-    /* Robot wraps stays below hero card in stacking context */
-    .robot-wrap{ 
-      width:var(--robot-size); height:var(--robot-size); 
-      display:flex; align-items:center; justify-content:center; 
-      position:relative; z-index:25; 
-      transition:transform .3s ease; 
-      filter: drop-shadow(0 0 40px rgba(255,69,0,0.45)); 
-      animation:robot-float 4s ease-in-out infinite; 
-      pointer-events:auto 
+    .robot-wrap{
+      width:var(--robot-size); height:var(--robot-size);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; z-index:25;
+      transition:transform .3s ease;
+      filter: drop-shadow(0 0 40px rgba(255,69,0,0.45));
+      animation:robot-float 4s ease-in-out infinite;
+      pointer-events:auto
     }
     @keyframes robot-float{ 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-20px) rotate(2deg)} 50%{transform:translateY(-10px) rotate(-2deg)} 75%{transform:translateY(-25px) rotate(1deg)} }
     .robot-wrap:hover{ animation-play-state:paused; transform:scale(1.05); filter: drop-shadow(0 0 60px rgba(255,69,0,0.6)) }
@@ -103,44 +102,48 @@
     @keyframes activate-pulse{ 0%,100%{transform:scale(1)}50%{transform:scale(1.05)} }
     .activate-button:hover{ transform:scale(1.1) }
 
-    /* Hero card sits in front with higher z-index */
-    .hero-card{ 
-      position:absolute; 
-      left:50%; 
-      top:15%; 
-      transform:translate(-50%,-50%); 
-      opacity:0; 
-      visibility:hidden; 
-      display:flex; 
-      flex-direction:column; 
-      align-items:center; 
+    /* HERO CARD: fixed & centered */
+    .hero-card{
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      visibility: hidden;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
       z-index:50;
+      max-width: 92vw;
+      width: min(900px, 85vw);
+      box-sizing: border-box;
+      pointer-events: auto;
+      will-change: transform, opacity, visibility;
     }
 
-    .hero-image-container{ position:relative; filter:drop-shadow(0 10px 40px rgba(255,69,0,.5)); margin-bottom:2rem }
-    .hero-image{ 
-      display:block; 
-      max-width:min(800px,85vw); 
-      max-height:80vh; 
-      width:auto; 
-      height:auto; 
-      border-radius:1.5rem; 
-      border:6px solid var(--color-flame); 
-      box-shadow:0 0 50px var(--color-flame); 
-      transition:all .4s ease; 
-      position:relative; 
-      z-index:55; 
-      object-fit:contain 
+    .hero-image-container{ position:relative; filter:drop-shadow(0 10px 40px rgba(255,69,0,.5)); margin-bottom:2rem; width: 100%; display:flex; justify-content:center; }
+    .hero-image{
+      display:block;
+      max-width:100%;
+      width: auto;
+      height: auto;
+      max-height:72vh;
+      border-radius:1.5rem;
+      border:6px solid var(--color-flame);
+      box-shadow:0 0 50px var(--color-flame);
+      transition:all .4s ease;
+      position:relative;
+      z-index:55;
+      object-fit:contain;
     }
     .hero-image-container:hover .hero-image{ transform:scale(1.05); box-shadow:0 0 80px var(--color-flame-bright) }
 
-    .hero-content{text-align:center;width:100%}
+    .hero-content{text-align:center;width:100%; padding: 0 1rem;}
     .hero-title{ font-size:var(--title-size); font-weight:900; color:var(--color-flame-bright); text-shadow:0 0 30px var(--color-flame); margin-bottom:1.5rem; letter-spacing:.25em; animation:flame-glow-pulse 3s ease-in-out infinite }
     .hero-subtitle{ font-size:var(--subtitle-size); font-family:var(--font-secondary); font-weight:400; color:var(--color-white); margin-bottom:3rem; letter-spacing:.35em; text-shadow:0 2px 10px rgba(0,0,0,.5) }
 
     @keyframes flame-glow-pulse{ 0%,100%{text-shadow:0 0 30px var(--color-flame)} 50%{text-shadow:0 0 50px var(--color-flame-bright)} }
 
-    /* engage as an anchor (works without JS), styled like a button */
     .engage-button{
       display:inline-block; padding:1.2rem 3.5rem; background:linear-gradient(135deg,var(--color-flame),var(--color-flame-bright));
       color:var(--color-white); font-family:var(--font-primary); font-weight:700; font-size:1.3rem; border-radius:2.5rem; text-decoration:none;
@@ -149,19 +152,17 @@
     .engage-button:focus{ outline:3px solid var(--color-flame); outline-offset:5px }
     .engage-button::after{ content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg,transparent, rgba(184, 10, 10, 0.65), transparent); transform:rotate(45deg); animation:shine 3s infinite }
     @keyframes shine{ 0%{transform:translateX(-100%) translateY(-100%) rotate(45deg)} 100%{transform:translateX(100%) translateY(100%) rotate(45deg)} }
-    .engage-button:active::before{ width:400px; height:400px }
 
     .flame-particle{ position:absolute; width:8px; height:8px; background:var(--color-flame); border-radius:50%; pointer-events:none; z-index:1000; box-shadow:0 0 20px var(--color-flame) }
     .impact-crater{ position:absolute; border-radius:1.5rem; border:3px solid var(--color-flame); opacity:0; pointer-events:none; z-index:999; box-shadow:0 0 40px var(--color-flame) }
 
-    /* Responsive safety: remove CSS left-shift on tablet/smaller so model won't clip */
+    /* Responsive: keep hero centered, adjust sizing */
     @media (max-width:1024px){
       .main-container{ flex-direction:column; gap:2rem; align-items:center }
-      .hero-card{ position:relative; left:auto; top:auto; transform:none; z-index:50 }
       :root{ --robot-size: min(500px,85vw) }
       .robot-section{ transform:none !important; order: 2 }
-      .hero-card{ order: 1 }
-      .hero-image{ max-width:min(600px,85vw) }
+      .hero-card{ order: 1; width: min(700px, 92vw); }
+      .hero-image{ max-width: 100%; max-height: 68vh; }
     }
 
     @media (max-width:768px){
@@ -179,7 +180,6 @@
       .hero-image{ max-width:min(400px,75vw); max-height:65vh }
     }
 
-    /* Ultra-wide screens: keep robot left and slightly lower */
     @media (min-width:1400px){
       .main-container{ gap:6rem }
       .robot-section{ align-self: flex-end; margin-bottom: 8vh }
@@ -197,7 +197,7 @@
   <div class="ember-container" id="emberContainer"></div>
 
   <main class="main-container">
-    <!-- Robot Section (initially nudged left via CSS) -->
+    <!-- Robot Section -->
     <div class="robot-section" id="robotSection">
       <div class="robot-wrap" id="robotWrap">
         <div class="hero-3d" id="splineContainer">
@@ -208,8 +208,8 @@
       <button class="activate-button" id="activateButton">🔥 ACTIVATE 🔥</button>
     </div>
 
-    <!-- Card: Image with text below (will drop into center) -->
-    <section class="hero-card" id="heroCard">
+    <!-- Card: fixed centered hero-card -->
+    <section class="hero-card" id="heroCard" aria-hidden="true">
       <div class="hero-image-container" id="heroImageContainer">
         <img src="Images/Kratorz2.png" alt="KRATORQ Event Poster" class="hero-image" id="heroImage">
       </div>
@@ -218,7 +218,6 @@
         <h1 class="hero-title">KRATORQ</h1>
         <p class="hero-subtitle">EVENT · ENGAGE · LAUNCH</p>
 
-        <!-- Use anchor so navigation works without JS; JS handler forces immediate navigation -->
         <a href="event.html" class="engage-button" id="engageButton" role="button" tabindex="0" aria-label="Navigate to event page">ENGAGE</a>
       </div>
     </section>
@@ -231,11 +230,6 @@
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let hasActivated = false;
-
-    // Tweak this if you want the final extra left-shift after the image lands.
-    // 0.28 = 28% of window width to the left (increase to move further left).
-    // reduced to keep the scene centered by default in most browsers
-    const SHIFT_EXTRA = 0.12;
 
     function initContinuousRobotAnimations(){
       if(prefersReducedMotion) return;
@@ -254,8 +248,6 @@
       }
 
       randomMovement();
-
-      // <<< CHANGED: runtime shimmer glow uses red drop-shadow now >>>
       gsap.to(hero3d, { scale:1.02, duration:2, ease:"sine.inOut", yoyo:true, repeat:-1 });
       gsap.to(robotWrap, { filter: 'drop-shadow(0 0 60px rgba(255,69,0,0.5))', duration:3, ease:"sine.inOut", yoyo:true, repeat:-1 });
     }
@@ -336,6 +328,7 @@
       gsap.to(flash, { opacity:0, duration:1.2, ease:"power2.out", onComplete: ()=> flash.remove() });
     }
 
+    // UPDATED: pushes robot down to sit below the hero image when activated
     function triggerActivation(){
       if(hasActivated || prefersReducedMotion) return;
       hasActivated = true;
@@ -344,61 +337,92 @@
       const robotWrap = document.getElementById('robotWrap');
       const robotSection = document.getElementById('robotSection');
       const heroCard = document.getElementById('heroCard');
+      const heroImage = document.getElementById('heroImage');
 
-      // Enforce stacking: robot stays BELOW the hero card visually
+      // Ensure stacking order: robot below hero
       robotSection.style.zIndex = '35';
       robotWrap.style.zIndex = '25';
       heroCard.style.zIndex = '50';
-  
+      heroCard.setAttribute('aria-hidden','false');
+
       const masterTL = gsap.timeline();
 
       // hide button
-      masterTL.to(activateButton, { scale:0, opacity:0, duration:0.4, ease:"back.in(2)", onComplete: ()=> activateButton.classList.add('hidden') })
+      masterTL.to(activateButton, { scale:0, opacity:0, duration:0.35, ease:"back.in(2)", onComplete: ()=> activateButton.classList.add('hidden') })
 
-      // robot celebrates
+      // robot flourish
       .to(robotWrap, { scale:1.4, y:-50, rotation:20, duration:0.6, ease:"power2.out" })
       .to(robotWrap, { rotation:-20, duration:0.25, ease:"sine.inOut", yoyo:true, repeat:2 })
 
-      // Move robot LEFT (less aggressive shift for better composition)
-      .to(robotSection, { x: -window.innerWidth * 0.22, duration:1.5, ease:"power3.inOut" })
-      .to(robotWrap, { scale:0.85, rotation:0, y:0, duration:1.5, ease:"power3.inOut" }, "<")
+      // slide robot left a bit for composition
+      .to(robotSection, { x: -window.innerWidth * 0.22, duration:1.1, ease:"power3.inOut" }, "<")
 
-      // Drop the card into perfect center (in FRONT of robot due to z-index)
+      // prepare heroCard and drop it into place (using y translation)
       .set(heroCard, { opacity:1, visibility:'visible', y:'-120vh', rotationZ:-180, scale:0.3 })
       .to(heroCard, {
-        y: 0, rotationZ: 0, scale: 1, duration: 1.8, ease:"power2.out",
+        y: 0,
+        rotationZ: 0,
+        scale: 1,
+        duration: 1.6,
+        ease:"power2.out",
+        onStart: () => {
+          // subtle robot settle BEFORE we push it down — reduce its scale back
+          gsap.to(robotWrap, { scale:0.95, duration: 0.7, ease: "power2.out" });
+        },
         onComplete: function(){
+          // create explosion effect under hero
           const rect = heroCard.getBoundingClientRect();
           const x = rect.left + rect.width / 2;
           const y = rect.bottom;
           createFlameExplosion(x, y);
 
-          // subtle bounce
-          gsap.timeline()
-            .to(heroCard, { top: 'calc(35% - 40px)', duration:0.25, ease:"power2.out" })
-            .to(heroCard, { top: '15%', duration:0.4, ease:"bounce.out" });
+          // subtle bounce using y translate
+          const bounceTL = gsap.timeline();
+          bounceTL.to(heroCard, { y: -28, duration: 0.18, ease: "power2.out" })
+                  .to(heroCard, { y: 0, duration: 0.6, ease: "bounce.out" });
 
-          // Final nudge robot slightly more left and DOWN (stays left-bottom position)
-          // Only on desktop (checked via window width)
-          if(window.innerWidth > 1024) {
-            gsap.to(robotSection, { 
-              x: -window.innerWidth * 0.25, 
-              y: window.innerHeight * 0.08,  // push down slightly
-              duration: 0.9, 
-              ease: "power3.out", 
-              delay: 0.12 
-            });
-          }
+          // ===== NEW: compute how far to push robot down so it sits BELOW the hero image =====
+          // Get DOMRects
+          const robotRect = robotSection.getBoundingClientRect();
+          const heroImageRect = heroImage.getBoundingClientRect();
+
+          // target top (we want robot's top to be below the hero image's bottom + margin)
+          const margin = 24; // px gap between hero bottom and top of robot
+          const targetTop = heroImageRect.bottom + margin;
+
+          // current robot top
+          const robotTop = robotRect.top;
+
+          // delta (positive => push down)
+          let deltaY = targetTop - robotTop;
+
+          // On very small screens or weird layouts, clamp delta to something reasonable
+          const maxPush = window.innerHeight * 0.6;
+          if (deltaY > maxPush) deltaY = maxPush;
+          if (deltaY < 0) deltaY = 0; // don't pull robot up
+
+          // also nudge robot more left and slightly down for desktop for composition
+          const leftShift = window.innerWidth > 1024 ? -window.innerWidth * 0.25 : -window.innerWidth * 0.18;
+          const extraDown = window.innerWidth > 1024 ? window.innerHeight * 0.08 : window.innerHeight * 0.03;
+
+          // Animate robotSection transform to move left and down by computed amount
+          gsap.to(robotSection, {
+            x: leftShift,
+            y: deltaY + extraDown,
+            duration: 0.9,
+            ease: "power3.out"
+          });
+
+          // slight settle on the robot wrap itself (scale and small bounce)
+          gsap.fromTo(robotWrap, { scale: 0.92 }, { scale: 1, duration: 0.8, ease: "elastic.out(1,0.7)" });
         }
-      }, "+=0.3");
+      }, "+=0.12");
     }
 
-    // Engagement anchor handler — guarantees navigation even if other handlers try to prevent
     function initEngageButton(){
       const engageButton = document.getElementById('engageButton');
       engageButton.addEventListener('click', (e) => {
         e.preventDefault();
-        // hard navigate right away (no timeout)
         window.location.href = 'event.html';
       });
       engageButton.addEventListener('keydown', (e) => {
@@ -414,7 +438,6 @@
       activateButton.addEventListener('click', triggerActivation);
     }
 
-    // initialize
     document.addEventListener('DOMContentLoaded', () => {
       createEmberParticles();
       initEngageButton();
