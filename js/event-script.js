@@ -77,7 +77,7 @@ const events = [
     description:
       "A thrilling one-on-one football showdown where agility, speed, and control decide the winner. Every goal brings you closer to victory.",
     image: "images/5.jpg",
-    formLink: "https://forms.gle/YOUR_FORM_LINK",
+    formLink: "https://forms.gle/uKgP7KDQoUGK86nR7",
   },
 ];
 
