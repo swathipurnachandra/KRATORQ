@@ -706,9 +706,10 @@
       if (!mount) return;
 
       if (isMobileViewport()){
-        // mobile: don't load the heavy 3D viewer, show a lightweight fallback image
-        mount.innerHTML = '<img src="Images/Kratorz2.png" alt="Robot placeholder" style="width:100%;height:auto;border-radius:1rem;display:block;">';
-        mount.setAttribute('aria-hidden','false');
+        // mobile: do NOT render the 3D model or inject the poster here (avoids duplicate poster).
+        // Keep mount empty and hidden from assistive tech.
+        mount.innerHTML = '';
+        mount.setAttribute('aria-hidden','true');
         return;
       }
 
